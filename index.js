@@ -1,8 +1,21 @@
 (function IIFE() {
+  const combos = [
+    [[0, 0], [0, 1], [0, 2]],
+    [[1, 0], [1, 1], [1, 2]],
+    [[2, 0], [2, 1], [2, 2]],
+
+    [[0, 0], [1, 0], [2, 0]],
+    [[0, 1], [1, 1], [2, 1]],
+    [[0, 2], [1, 2], [2, 2]],
+
+    [[0, 0], [1, 1], [2, 2]],
+    [[0, 2], [1, 1], [2, 0]]
+  ];
   const gameData = [...Array(3)].map(item => [...Array(3)]);
   const app = document.querySelector("#app");
   const cross = "👹";
   const circle = "😇";
+  let winner = null;
   let turn = 0;
 
   const create = ({ tag, classList, textContent, events = {} }) => {
@@ -16,10 +29,21 @@
     return element;
   };
 
+  const checkWinner = () => {
+    const currentChar = turn % 2 === 0 ? cross : circle;
+    const isWinner = combos.some(combo =>
+      combo.every(([row, box]) => gameData[row][box] === currentChar)
+    );
+    winner = isWinner ? currentChar : null;
+  };
+
   const addGameData = (row, box) => {
-    console.log(row, box);
     gameData[row][box] = turn % 2 === 0 ? cross : circle;
-    turn = turn + 1;
+    checkWinner();
+
+    if (!winner) {
+      turn = turn + 1;
+    }
     render();
   };
 
@@ -40,7 +64,7 @@
           textContent: boxData,
           events: {
             click: () =>
-              !!gameData[rowIndex][boxIndex]
+              !!gameData[rowIndex][boxIndex] || !!winner
                 ? null
                 : addGameData(rowIndex, boxIndex)
           }
